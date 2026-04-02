@@ -12,5 +12,13 @@ app.get('/accommodation/location/:location', (req, res) => {
 	res.json(results);
 });
 
+app.get('/accommodation/type/:type/location/:location', (req, res) => {
+	const stmt = db.prepare(
+		"SELECT * FROM accommodation WHERE type = ? COLLATE NOCASE AND location = ? COLLATE NOCASE"
+	);
+	const results = stmt.all(req.params.type, req.params.location);
+	res.json(results);
+});
+
 
 ViteExpress.listen(app, PORT, () => {console.log(`Listening on port ${PORT}.`)});
