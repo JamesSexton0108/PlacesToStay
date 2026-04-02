@@ -15,7 +15,7 @@
     "vite-express": "^0.22.1"
   },
   "scripts": {
-    "dev": "tsc && tsx server.ts",
+    "dev": "tsc && tsx watch server.ts",
     "build": "vite build",
     "start": "set NODE_ENV=production&& tsx server.ts"
   }
