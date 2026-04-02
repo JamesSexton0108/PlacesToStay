@@ -24,12 +24,18 @@ app.get('/accommodation/type/:type/location/:location', (req, res) => {
 });
 
 app.post('/booking', (req, res) => {
+    console.log('/booking')
+    console.log(req.body)
+    const insertstmt = db.prepare('INSERT INTO acc_bookings(accID, thedate, userID, npeople) VALUES(?,?,?,?)');
+    const updatestmt = db.prepare('UPDATE acc_dates SET availability = availability - ? WHERE accID = ? AND thedate = ?');
+    
+    updatestmt.run(req.body.npeople, req.body.accID, req.body.thedate);
 
-	const insertstmt = db.prepare('INSERT INTO acc_bookings(accID, thedate, userID, npeople) VALUES(?,?,?,?)');
-	const info = insertstmt.run(req.body.accID, req.body.thedate, req.body.userID, req.body.npeople);
-	res.json({id: info.lastInsertRowid})
+    const info = insertstmt.run(req.body.accID, req.body.thedate, req.body.userID, req.body.npeople);
+    res.json({id: info.lastInsertRowid})
 
 });
+
 
 
 ViteExpress.listen(app, PORT, () => {console.log(`Listening on port ${PORT}.`)});
