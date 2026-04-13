@@ -22,26 +22,50 @@ export default function App() {
     setResults(data);
   }
 
+   async function bookAccommodation(accID: number) {
+        setMessage("");
+        const response = await fetch("/booking", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                accID: accID,
+                thedate: 260601,
+                userID: 1,
+                npeople: 1,
+            }),
+        });
+        const data = await response.json();
+        if (data.id) {
+            setMessage(`Booking confirmed! Booking ID: ${data.id}`);
+        } else {
+            setMessage("Booking failed. Please try again.");
+        }
+    }
+
+
     return (
         <div>
             <h1>Places To Stay</h1>
-
+ 
             <input
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="Enter location"
             />
-    
+ 
             <button onClick={searchAccommodation}>Search</button>
-
+ 
+            {message && <p><strong>{message}</strong></p>}
+ 
             <div>
                 {results.map((accommodation) => (
-                <div key={accommodation.ID}>
-                    {accommodation.name} - {accommodation.type} {accommodation.location} - Coordinates: {accommodation.latitude}, {accommodation.longitude}
-                </div>
+                    <div key={accommodation.ID}>
+                        {accommodation.name} - {accommodation.type} {accommodation.location} - Coordinates: {accommodation.latitude}, {accommodation.longitude}
+                        <button onClick={() => bookAccommodation(accommodation.ID)}>Book</button>
+                    </div>
                 ))}
             </div>
         </div>
-    )
+    );
 }
