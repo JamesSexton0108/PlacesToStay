@@ -13,6 +13,7 @@ export default function App() {
     const [location, setLocation] = useState("");
     const [results, setResults] = useState<Accommodation[]>([]);
     const [message, setMessage] = useState("")
+    const [messageType, setMessageType] = useState<"success" | "error">("success")
 
 
     async function searchAccommodation() {
@@ -29,16 +30,22 @@ export default function App() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 accID: accID,
-                thedate: 260601,
+                thedate: null,
                 userID: 1,
                 npeople: 1,
             }),
         });
         const data = await response.json();
-        if (data.id) {
-            setMessage(`Booking confirmed! Booking ID: ${data.id}`);
+
+        if (response.ok) {
+            setMessageType("success");
+            setMessage(`Booking confirmed! Your reference number is ${data.id}.`);
+        } else if (response.status === 400) {
+            setMessageType("error");
+            setMessage(`Your booking could not be completed because some required information was missing. Please try again.`);
         } else {
-            setMessage("Booking failed. Please try again.");
+            setMessageType("error");
+            setMessage("Something went wrong while processing your booking. Please try again later.");
         }
     }
 
