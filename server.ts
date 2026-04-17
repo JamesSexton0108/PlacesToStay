@@ -26,16 +26,33 @@ app.get('/accommodation/type/:type/location/:location', (req, res) => {
 app.post('/booking', (req, res) => {
     console.log('/booking')
     console.log(req.body)
+ 
+    const { accID, thedate, userID, npeople } = req.body;
+ 
+    if (accID === undefined || accID === null || accID === '') {
+        res.status(400).json({ error: 'Accommodation ID is required.' });
+        return;
+    }
+ 
+    if (npeople === undefined || npeople === null || npeople === '') {
+        res.status(400).json({ error: 'Number of people is required.' });
+        return;
+    }
+ 
+    if (thedate === undefined || thedate === null || thedate === '') {
+        res.status(400).json({ error: 'Date is required.' });
+        return;
+    }
+ 
     const insertstmt = db.prepare('INSERT INTO acc_bookings(accID, thedate, userID, npeople) VALUES(?,?,?,?)');
     const updatestmt = db.prepare('UPDATE acc_dates SET availability = availability - ? WHERE accID = ? AND thedate = ?');
     
-    updatestmt.run(req.body.npeople, req.body.accID, req.body.thedate);
-
-    const info = insertstmt.run(req.body.accID, req.body.thedate, req.body.userID, req.body.npeople);
+    updatestmt.run(npeople, accID, thedate);
+ 
+    const info = insertstmt.run(accID, thedate, userID, npeople);
     res.json({id: info.lastInsertRowid})
-
 });
-
+ 
 
 
 ViteExpress.listen(app, PORT, () => {console.log(`Listening on port ${PORT}.`)});
