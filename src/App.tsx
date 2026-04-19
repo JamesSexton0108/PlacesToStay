@@ -7,6 +7,7 @@ type Accommodation = {
   location: string;
   latitude: number;
   longitude: number;
+  description: string;
 };
 
 export default function App() {
@@ -68,7 +69,7 @@ export default function App() {
             <div>
                 {results.map((accommodation) => (
                     <div key={accommodation.ID}>
-                        {accommodation.name} - {accommodation.type} {accommodation.location} - Coordinates: {accommodation.latitude}, {accommodation.longitude}
+                        {accommodation.name} - {accommodation.type} {accommodation.location} - Coordinates: {accommodation.latitude}, {accommodation.longitude}, "{accommodation.description}" 
                         <button onClick={() => bookAccommodation(accommodation.ID)}>Book</button>
                     </div>
                 ))}
