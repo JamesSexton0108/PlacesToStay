@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import * as L from "leaflet";
+import 'leaflet/dist/leaflet.css';
 
 type Accommodation = {
   ID: number;
@@ -16,13 +18,51 @@ export default function App() {
     const [message, setMessage] = useState("")
     const [messageType, setMessageType] = useState<"success" | "error">("success")
 
+    const mapRef = useRef<L.Map | null>(null);
+    const markersRef = useRef<L.Marker[]>([]);
+
+    useEffect( (()=> {
+        loadMap();
+    }), []);
+
+    useEffect( (()=> {
+       loadMarkers(); 
+    }), [results]);
+
+    function loadMap() {
+        if (mapRef.current === null) {
+            mapRef.current = L.map("map1")
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "Copyright OSM contributors, OBDL"
+        }).addTo(mapRef.current);
+        mapRef.current.setView(L.latLng(50.9, -1.4), 10)
+        }
+    };
+
+    function loadMarkers() {
+        if (!mapRef.current) return;
+
+        markersRef.current.forEach(marker => marker.remove())
+        markersRef.current = [];
+
+        results.forEach(accommodation => {
+            const marker = L.marker(L.latLng(accommodation.latitude, accommodation.longitude)).addTo(mapRef.current!);
+
+            marker.bindPopup(`${accommodation.name}, "${accommodation.description}"`);
+            markersRef.current.push(marker);
+        });
+
+        if (results.length > 0) {
+            mapRef.current.setView(L.latLng(results[0].latitude, results[0].longitude), 12);
+        };
+    };
 
     async function searchAccommodation() {
     setMessage("");
     const response = await fetch(`/accommodation/location/${encodeURIComponent(location)}`);
     const data = await response.json();
     setResults(data);
-  }
+  };
 
    async function bookAccommodation(accID: number) {
         setMessage("");
@@ -74,6 +114,7 @@ export default function App() {
                     </div>
                 ))}
             </div>
+            <div id="map1" style={{ width: "800px", height: "500px", marginTop: "20px" }}></div>
         </div>
     );
 }
