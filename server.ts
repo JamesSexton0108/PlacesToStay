@@ -1,13 +1,32 @@
 import express from 'express';
 import ViteExpress from 'vite-express';
 import Database from 'better-sqlite3';
+import expressSession from 'express-session';
+import betterSqlite3Session from 'express-session-better-sqlite3';
 
 const app = express();
 const PORT = 3000;
 const db = new Database("placestostay.db")
 
+const sessDb = new Database("session.db");
+const SqliteStore = betterSqlite3Session(expressSession,sessDb)
+
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
+
+app.use(expressSession({
+    store: SqliteStore(),
+    secret: 'UnguessableSecret',
+    resave: true,
+    saveUninitialized: false,
+    rolling: true,
+    unset: 'destroy',
+    proxy: true,
+    cookie: {
+        maxAge: 600000,
+        httpOnly: false
+    }
+}));
 
 app.get('/accommodation/location/:location', (req, res) => {
 	const stmt = db.prepare("SELECT * FROM accommodation WHERE location=? COLLATE NOCASE");
