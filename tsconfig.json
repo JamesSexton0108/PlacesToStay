@@ -7,5 +7,9 @@
         "skipLibCheck": true,
         "jsx": "preserve"
     },
-    "files": ["src/main.tsx"]
+    
+    "paths": {
+        "*": ["types/*"]
+    },
+    "files": ["src/main.tsx", "session.d.ts"]
 }

@@ -8,6 +8,8 @@
     "@vitejs/plugin-react": "^6.0.0",
     "better-sqlite3": "^12.6.2",
     "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "express-session-better-sqlite3": "^1.2.1",
     "leaflet": "^1.9.4",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
