@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
 app.use(expressSession({
-    store: SqliteStore(),
+    store: new SqliteStore(),
     secret: 'UnguessableSecret',
     resave: true,
     saveUninitialized: false,
@@ -39,6 +39,28 @@ app.use((req, res, next) => {
         }
     }
 })
+
+app.post('/login', (req, res) => {
+    const stmt = db.prepare('SELECT * FROM acc_users WHERE username = ? AND password = ?');
+    const user = stmt.get(req.body.username, req.body.password) as { username: string } | undefined;
+ 
+    if (user) {
+        req.session.username = user.username;
+        res.json({ username: user.username });
+    } else {
+        res.status(401).json({ error: 'Incorrect username or password.' });
+    }
+});
+
+app.get('/login', (req, res) => {
+    res.json({ username: req.session.username || null });
+});
+
+app.post('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.json({ loggedout: true});
+    });
+});
 
 app.get('/accommodation/location/:location', (req, res) => {
 	const stmt = db.prepare("SELECT * FROM accommodation WHERE location=? COLLATE NOCASE");
