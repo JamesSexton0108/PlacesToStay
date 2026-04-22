@@ -28,6 +28,18 @@ app.use(expressSession({
     }
 }));
 
+app.use((req, res, next) => {
+    if (req.method !== 'POST' || req.path === '/login') {
+        next();
+    } else {
+        if (req.session.username) {
+            next()
+        } else {
+            res.status(401).json({ error: "You must be logged in to do this." })
+        }
+    }
+})
+
 app.get('/accommodation/location/:location', (req, res) => {
 	const stmt = db.prepare("SELECT * FROM accommodation WHERE location=? COLLATE NOCASE");
 	const results = stmt.all(req.params.location);
