@@ -20,6 +20,20 @@ export default function App() {
 
     const mapRef = useRef<L.Map | null>(null);
     const markersRef = useRef<L.Marker[]>([]);
+    
+    const [username, setUsername] = useState<string | null>(null);
+    const [loginUsername, setLoginUsername] = useState("");
+    const [loginPassword, setLoginPassword] = useState("");
+
+    useEffect(() => {
+        async function checkLogin() {
+            const response = await fetch('/login');
+            const data = await response.json();
+            setUsername(data.username);
+            
+        }
+        checkLogin();
+    }, []);
 
     useEffect( (()=> {
         loadMap();
@@ -57,6 +71,31 @@ export default function App() {
         };
     };
 
+    async function login() {
+        const response = await fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: loginUsername, password: loginPassword })
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+            setUsername(data.username);
+            setLoginUsername("");
+            setLoginPassword("");
+        } else {
+            alert('Incorrect username or password. Please try again.');
+        }
+    };
+
+    async function logout() {
+        await fetch('/logout', { method: 'POST' });
+        setUsername(null);
+    };
+
+
+
+
     async function searchAccommodation() {
     setMessage("");
     const response = await fetch(`/accommodation/location/${encodeURIComponent(location)}`);
@@ -71,7 +110,7 @@ export default function App() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 accID: accID,
-                thedate: null,
+                thedate: 260601,
                 userID: 1,
                 npeople: 1,
             }),
@@ -84,6 +123,9 @@ export default function App() {
         } else if (response.status === 400) {
             setMessageType("error");
             setMessage(`Your booking could not be completed because some required information was missing. Please try again.`);
+        } else if (response.status === 401) {
+            setMessageType("error");
+            setMessage("You must be logged in to make a booking.");
         } else {
             setMessageType("error");
             setMessage("Something went wrong while processing your booking. Please try again later.");
@@ -94,6 +136,29 @@ export default function App() {
     return (
         <div>
             <h1>Places To Stay</h1>
+
+            {username === null ? (
+                <div>
+                    <input
+                        type="text"
+                        value={loginUsername}
+                        onChange={(e) => setLoginUsername(e.target.value)}
+                        placeholder="Username"
+                    />
+                    <input
+                        type="password"
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
+                        placeholder="Password"
+                    />
+                    <button onClick={login}>Login</button>
+                </div>
+            ) : (
+                <div>
+                    <p>Logged in as {username}</p>
+                    <button onClick={logout}>Logout</button>
+                </div>
+            )}
  
             <input
                 type="text"
@@ -104,16 +169,21 @@ export default function App() {
  
             <button onClick={searchAccommodation}>Search</button>
  
-            {message && <p><strong>{message}</strong></p>}
+            {message && (
+                <p style={{ color: messageType === "success" ? "green" : "red" }}>
+                    <strong>{message}</strong>
+                </p>
+            )}
  
             <div>
                 {results.map((accommodation) => (
                     <div key={accommodation.ID}>
-                        {accommodation.name} - {accommodation.type} {accommodation.location} - Coordinates: {accommodation.latitude}, {accommodation.longitude}, "{accommodation.description}" 
+                        {accommodation.name} - {accommodation.type} {accommodation.location} - Coordinates: {accommodation.latitude}, {accommodation.longitude}, "{accommodation.description}"
                         <button onClick={() => bookAccommodation(accommodation.ID)}>Book</button>
                     </div>
                 ))}
             </div>
+ 
             <div id="map1" style={{ width: "800px", height: "500px", marginTop: "20px" }}></div>
         </div>
     );
