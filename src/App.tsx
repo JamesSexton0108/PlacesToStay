@@ -170,9 +170,9 @@ export default function App() {
             <button onClick={searchAccommodation}>Search</button>
  
             {message && (
-                <p style={{ color: messageType === "success" ? "green" : "red" }}>
+               <h2><p style={{ color: messageType === "success" ? "green" : "red" }}>
                     <strong>{message}</strong>
-                </p>
+                </p></h2>
             )}
  
             <div>
