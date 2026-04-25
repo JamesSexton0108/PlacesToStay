@@ -96,6 +96,30 @@ app.post('/booking', (req, res) => {
         res.status(400).json({ error: 'Date is required.' });
         return;
     }
+
+     const now = new Date();
+    const yy = String(now.getFullYear()).slice(2);
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const todayNum = parseInt(`${yy}${mm}${dd}`);
+ 
+    if (Number(thedate) < todayNum) {
+        res.status(400).json({ error: 'The selected date is in the past.' });
+        return;
+    }
+
+    const availStmt = db.prepare('SELECT * FROM acc_dates WHERE accID = ? AND thedate = ?');
+    const dateRow = availStmt.get(accID, thedate) as { availability: number } | undefined;
+ 
+    if (!dateRow) {
+        res.status(409).json({ error: 'No availability found for this accommodation on the selected date.' });
+        return;
+    }
+ 
+    if (dateRow.availability < Number(npeople)) {
+        res.status(409).json({ error: `Not enough availability. Only ${dateRow.availability} space(s) remaining on this date.` });
+        return;
+    }
  
     const insertstmt = db.prepare('INSERT INTO acc_bookings(accID, thedate, userID, npeople) VALUES(?,?,?,?)');
     const updatestmt = db.prepare('UPDATE acc_dates SET availability = availability - ? WHERE accID = ? AND thedate = ?');

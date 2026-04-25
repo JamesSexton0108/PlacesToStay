@@ -112,7 +112,7 @@ export default function App() {
                 accID: accID,
                 thedate: 260601,
                 userID: 1,
-                npeople: 1,
+                npeople: 16,
             }),
         });
         const data = await response.json();
@@ -120,12 +120,15 @@ export default function App() {
         if (response.ok) {
             setMessageType("success");
             setMessage(`Booking confirmed! Your reference number is ${data.id}.`);
-        } else if (response.status === 400) {
-            setMessageType("error");
-            setMessage(`Your booking could not be completed because some required information was missing. Please try again.`);
-        } else if (response.status === 401) {
+        }  else if (response.status === 401) {
             setMessageType("error");
             setMessage("You must be logged in to make a booking.");
+        } else if (response.status === 400) {
+            setMessageType("error");
+            setMessage("Your booking could not be completed: " + data.error);
+        } else if (response.status === 409) {
+            setMessageType("error");
+            setMessage("Sorry, this accommodation is not available: " + data.error);
         } else {
             setMessageType("error");
             setMessage("Something went wrong while processing your booking. Please try again later.");
