@@ -1,0 +1,31 @@
+body {
+    background-color: rgb(160, 72, 243);
+}
+input, button {
+    font-family: Georgia, 'Times New Roman', serif;
+    background-color: orangered;
+    color: black;
+}
+ 
+h1 {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    color: #0f1568;
+}
+ 
+button {
+    cursor: pointer;
+    margin: 4px;
+}
+ 
+input {
+    margin: 4px;
+}
+ 
+#message {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+
+ 
