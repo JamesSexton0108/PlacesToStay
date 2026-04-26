@@ -18,6 +18,9 @@ export default function App() {
     const [message, setMessage] = useState("")
     const [messageType, setMessageType] = useState<"success" | "error">("success")
 
+    const [dates, setDates] = useState<{ [id: number]: string }>({});
+    const [npeople, setNpeople] = useState<{ [id: number]: number }>({});
+
     const mapRef = useRef<L.Map | null>(null);
     const markersRef = useRef<L.Marker[]>([]);
     
@@ -105,14 +108,27 @@ export default function App() {
 
    async function bookAccommodation(accID: number) {
         setMessage("");
+
+        const datesVal = dates[accID];
+        const npeopleVal = npeople[accID] || 1;
+
+        if (!datesVal) {
+            setMessageType("error");
+            setMessage("Please select a date before booking.");
+            return;
+        }
+
+        const parts = datesVal.split('-');
+        const thedate = parseInt(`${parts[0].slice(2)}${parts[1]}${parts[2]}`);
+
         const response = await fetch("/booking", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 accID: accID,
-                thedate: 260601,
+                thedate: thedate,
                 userID: 1,
-                npeople: 16,
+                npeople: npeopleVal,
             }),
         });
         const data = await response.json();
@@ -135,11 +151,13 @@ export default function App() {
         }
     }
 
+    const today = new Date().toISOString().split('T')[0];
+
 
     return (
         <div>
             <h1>Places To Stay</h1>
-
+ 
             {username === null ? (
                 <div>
                     <input
@@ -173,15 +191,28 @@ export default function App() {
             <button onClick={searchAccommodation}>Search</button>
  
             {message && (
-               <h2><p style={{ color: messageType === "success" ? "green" : "red" }}>
+                <p style={{ color: messageType === "success" ? "green" : "red", fontSize: "1.3rem" }}>
                     <strong>{message}</strong>
-                </p></h2>
+                </p>
             )}
  
             <div>
                 {results.map((accommodation) => (
                     <div key={accommodation.ID}>
                         {accommodation.name} - {accommodation.type} {accommodation.location} - Coordinates: {accommodation.latitude}, {accommodation.longitude}, "{accommodation.description}"
+                        <br />
+                        <label>Date: <input
+                            type="date"
+                            min={today}
+                            value={dates[accommodation.ID] || ""}
+                            onChange={(e) => setDates({ ...dates, [accommodation.ID]: e.target.value })}
+                        /></label>
+                        <label> Number of people: <input
+                            type="number"
+                            min={1}
+                            value={npeople[accommodation.ID] || 1}
+                            onChange={(e) => setNpeople({ ...npeople, [accommodation.ID]: parseInt(e.target.value) })}
+                        /></label>
                         <button onClick={() => bookAccommodation(accommodation.ID)}>Book</button>
                     </div>
                 ))}
